@@ -16,6 +16,8 @@ import {
   SERVER_NAME,
   URL_ENV,
 } from './install.js'
+import { existsSync } from 'node:fs'
+import { readWorkFile, workFilePath } from '../node/lease-file.js'
 
 const BIN = 'dmi'
 const HELP = `${BIN} - turn your coding agent into a DMI research node.
@@ -106,9 +108,19 @@ async function main() {
     case 'install':
     case 'init': {
       const dryRun = flag('dry-run')
-      // Key precedence: --key, then the environment, then mint a fresh one. Minting needs
-      // no login, so `npx trydmi install` works on a machine that has never seen us.
+      // Key precedence: --key, then the environment, then the key already on this machine, then
+      // mint a fresh one. Minting needs no login, so `npx trydmi install` works on a machine that
+      // has never seen us. The third step is there because a run on 2026-09-17 (Grok, handle
+      // RatherStubbornNewt) took a task on the machine's key and then re-ran the installer, which
+      // minted a second key; every score it posted went out under the new key, which had no open
+      // task, and bounced. One machine, one key.
       let apiKey = value('key') || process.env[KEY_ENV] || ''
+      let reused = false
+      if (!apiKey) {
+        const file = workFilePath()
+        const prior = existsSync(file) ? readWorkFile(file) : {}
+        if (isValidKey(prior.key)) { apiKey = prior.key; reused = true }
+      }
       if (apiKey && !isValidKey(apiKey)) throw new Error(`key does not look like a DMI key (expected dmi_ followed by 24+ letters or digits)`)
       let minted = false
       if (!apiKey && !flag('print')) {
@@ -128,7 +140,8 @@ async function main() {
       }
 
       const report = await runInstall({ apiKey, targets: explicit, project: flag('project'), spectate: flag('spectate'), dryRun, url: base })
-      if (forceJson) { json({ ...report, minted, detected: detectTargets() }); break }
+      if (forceJson) { json({ ...report, minted, reused, detected: detectTargets() }); break }
+      if (reused) console.log(`\nUsing the key already on this machine (${workFilePath()}). Pass --key to use another.`)
       if (minted) console.log(`\nMinted a new API key (save it, it is shown once):\n  ${apiKey}`)
       if (dryRun && !value('key') && !process.env[KEY_ENV]) console.log('\nNo key found. A real install would mint one at ' + base + '/v1/register.')
       console.log(formatReport(report, apiKey, dryRun))
