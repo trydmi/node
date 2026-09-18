@@ -1,0 +1,92 @@
+{
+  "name": "trydmi",
+  "version": "0.3.0",
+  "description": "DMI (Decentralized Mass Intelligence): turn the coding agent you already run into a research node. Install the MCP server, work tasks in the background, or run a compute node that scores submissions for credit.",
+  "license": "Apache-2.0",
+  "homepage": "https://trydmi.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trydmi/dmi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/trydmi/dmi/issues"
+  },
+  "keywords": [
+    "dmi",
+    "mcp",
+    "mcp-server",
+    "ai-agents",
+    "claude-code",
+    "cursor",
+    "codex",
+    "distributed-compute",
+    "research",
+    "kv-cache",
+    "verilog",
+    "ramulator",
+    "verilator"
+  ],
+  "type": "module",
+  "bin": {
+    "dmi": "./cli/cli.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "cli/",
+    "node/",
+    "coordinator/paths.js",
+    "coordinator/run-job.js",
+    "coordinator/evaluate.js",
+    "coordinator/evaluate-worker.js",
+    "coordinator/challenge.js",
+    "coordinator/challenges/*/harness.js",
+    "coordinator/challenges/*/baseline.*",
+    "coordinator/challenges/*/gen-trace.*",
+    "coordinator/challenges/*/gen-corpus.mjs",
+    "coordinator/challenges/*/tb.cpp",
+    "coordinator/challenges/*/README.md",
+    "coordinator/challenges/*/run.cpp",
+    "coordinator/challenges/*/run.cu",
+    "coordinator/challenges/*/*.lib.gz"
+  ],
+  "scripts": {
+    "coordinator": "node coordinator/server.js",
+    "node": "node node/mcp-server.js",
+    "gen:traces": "node coordinator/challenges/kv-cache-eviction/gen-trace.js",
+    "pretest": "DMI_HIDDEN_DIR=\"${TMPDIR:-/tmp}/dmi-test-hidden\" node scripts/test-bootstrap.mjs",
+    "test": "DMI_HIDDEN_DIR=\"${TMPDIR:-/tmp}/dmi-test-hidden\" DMI_TIMING_TOLERANCE_PCT=25 node --test --test-concurrency=1 test/*.test.mjs",
+    "pretest:all": "DMI_HIDDEN_DIR=\"${TMPDIR:-/tmp}/dmi-test-hidden\" node scripts/test-bootstrap.mjs",
+    "test:all": "DMI_HIDDEN_DIR=\"${TMPDIR:-/tmp}/dmi-test-hidden\" DMI_ENABLE_DRAM=1 DMI_ENABLE_RTL=1 DMI_ENABLE_SYNTH=1 DMI_ENABLE_CONTEST=1 DMI_ENABLE_SAT=1 DMI_TIMING_TOLERANCE_PCT=25 node --test --test-concurrency=1 test/*.test.mjs",
+    "install:agents": "node cli/cli.js install",
+    "start": "node coordinator/server.js",
+    "smoke:remote": "node scripts/smoke-remote.mjs",
+    "seed": "bash scripts/run-agents.sh",
+    "snapshot": "node scripts/snapshot.mjs",
+    "migrate": "node scripts/migrate.mjs && node scripts/harness/rls-guard.js",
+    "db:reset": "node scripts/db-reset.mjs",
+    "test:remote": "bash scripts/test-remote.sh",
+    "doctor": "bash scripts/dev/git-doctor.sh",
+    "start-feature": "bash scripts/dev/start-feature.sh",
+    "sync": "bash scripts/dev/sync-onto-main.sh",
+    "reap": "bash scripts/dev/reap.sh",
+    "recall": "bash scripts/dev/recall.sh",
+    "plans:index": "bash scripts/dev/plans-index.sh",
+    "pr:index": "bash scripts/dev/pr-index.sh",
+    "kit:selftest": "bash scripts/harness/test-autonomy-hooks.sh",
+    "check:rls": "node scripts/harness/rls-guard.js",
+    "harness:review": "node scripts/harness/harness-review.js",
+    "work": "node cli/cli.js work",
+    "pack:check": "npm pack --dry-run",
+    "build-log": "node scripts/dev/build-log.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.0",
+    "pg": "^8.23.0",
+    "zod": "^3.23.8"
+  },
+  "workspaces": [
+    "coordinator"
+  ]
+}
