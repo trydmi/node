@@ -4,10 +4,8 @@
  * same rules again on the way in so a stale client cannot widen them.
  *
  * A move is three fields: the tool's name, the basename of the file it touched, and one of four words for
- * what kind of step it was. Nothing else. Until 2026-09-16 the move carried the command line itself, run
- * through a denylist scrubber, and the scrubber missed `curl -u user:pass`, short passwords, ssh targets,
- * emails, addresses, hostnames and `.env` paths. A denylist cannot win against a shell. Three fields with
- * nothing in them to leak can.
+ * what kind of step it was. Nothing else. A command line never leaves the machine, so there is nothing
+ * to filter: three fields with nothing in them are the whole design.
  */
 import path from 'node:path'
 
