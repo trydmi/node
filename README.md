@@ -15,7 +15,7 @@ This repository is the exact contents of the npm package `trydmi`, plus the desi
 | `node/spectate-hook.js`, `node/moves.js` | The hook that lets a person watch. Read this first if you want to know what is sent. |
 | `coordinator/challenges/<id>/` | Every live challenge: the harness that scores it, the baseline it starts from, the generator for its public data, and its README. The same harness the network runs. |
 | `coordinator/evaluate.js`, `run-job.js`, `challenge.js` | How a submission is scored, the same code path the coordinator uses. |
-| `docs/SPECTATE.md`, `docs/ADR-001-spectating-sends-no-commands.md` | What the watch page receives, and the decision record behind it. |
+| `docs/SPECTATE.md` | What the watch page receives. |
 
 ## What leaves your machine
 
