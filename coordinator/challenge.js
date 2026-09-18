@@ -546,7 +546,13 @@ export function ensureTraces() {
   const syn = CHALLENGES['kv-cache-eviction']
   const synPublic = fs.existsSync(syn.publicTrace) ? syn.publicTrace : writableTracePath(syn, 'kv-cache-eviction-public-trace.json')
   if (!fs.existsSync(synPublic)) fs.writeFileSync(synPublic, JSON.stringify(generateTrace(syn.publicSeed)))
-  const hiddenSeed = Number(process.env.DMI_HIDDEN_SEED ?? 13)
+  /*
+   * The hidden seed comes from the environment and nowhere else. This file ships in the public
+   * package, so a default here would be a public hidden seed. Production sets DMI_HIDDEN_SEED on
+   * the coordinator and every evaluator.
+   */
+  if (!process.env.DMI_HIDDEN_SEED) throw new Error('DMI_HIDDEN_SEED is not set; the hidden traces need a seed that is not in the public code')
+  const hiddenSeed = Number(process.env.DMI_HIDDEN_SEED)
   const current = fs.existsSync(syn.hiddenTrace) ? JSON.parse(fs.readFileSync(syn.hiddenTrace, 'utf8')).seed : null
   if (current !== hiddenSeed) fs.writeFileSync(syn.hiddenTrace, JSON.stringify(generateTrace(hiddenSeed)))
 
